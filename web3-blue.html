@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>EVMt Smart Contract Creator Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Blue AERO UI/UX, black fonts, white buttons/titles, blue background and pink blur -->
+  <style>
+    :root {
+      --main-bg: #eef6fd;
+      --accent-blue: #4aabff;
+      --accent-blue-strong: #156dc3;
+      --accent-pink: #f0a8d9;
+      --accent-pink-blur: #f9e7f5;
+      --text: #12141a;
+      --card-bg: #f8fbffcc;
+      --shadow: 0 4px 24px 0 #4aabff33;
+      --border-radius: 18px;
+      --white: #fff;
+      --button-hover: #cbe8ff;
+    }
+    html, body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--main-bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+    .bg-circles {
+      position: fixed;
+      z-index: 0;
+      width: 100vw;
+      height: 100vh;
+      left: 0; top: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .circle {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(28px);
+      animation: moveCircle 18s linear infinite alternate;
+      opacity: 0.21;
+    }
+    .circle.blue {
+      background: radial-gradient(circle, var(--accent-blue-strong) 0%, var(--accent-blue) 70%, transparent 100%);
+    }
+    .circle.pink {
+      background: radial-gradient(circle, var(--accent-pink) 0%, var(--accent-pink-blur) 80%, transparent 100%);
+      opacity: 0.14;
+      filter: blur(53px);
+    }
+    @keyframes moveCircle {
+      0% { transform: translateY(0) scale(1);}
+      100% { transform: translateY(60px) scale(1.1);}
+    }
+    header {
+      position: relative;
+      z-index: 2;
+      background: var(--card-bg);
+      box-shadow: var(--shadow);
+      border-radius: var(--border-radius);
+      margin: 24px 18px 18px 18px;
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--white);
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, var(--accent-blue-strong), var(--accent-blue));
+      padding: 6px 20px 4px 20px;
+      border-radius: 13px;
+      box-shadow: 0 2px 10px #4aabff22;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 32px;
+      margin: 0;
+      padding: 0;
+    }
+    nav a {
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 1.13rem;
+      transition: color 0.2s;
+      background: var(--white);
+      border-radius: 8px;
+      padding: 7px 18px;
+      margin: 0 2px;
+    }
+    nav a:hover {
+      color: var(--accent-blue-strong);
+      background: var(--button-hover);
+    }
+    .wallet-status {
+      background: var(--white);
+      color: var(--accent-blue-strong);
+      border-radius: 11px;
+      padding: 7px 18px;
+      font-size: 1.01rem;
+      font-weight: 500;
+      margin-left: 25px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 8px #51bfff33;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 150px;
+      justify-content: center;
+      border: 1.4px solid var(--accent-blue);
+    }
+    .wallet-status.connected {
+      background: var(--white);
+      color: var(--accent-blue-strong);
+      border: 1.8px solid var(--accent-blue-strong);
+    }
+    .wallet-status.disconnected {
+      background: #f6f6f6;
+      color: #b7b7b7;
+      border: 1.4px solid #e1e1e1;
+    }
+    main {
+      z-index: 2;
+      position: relative;
+      margin: 0 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .card-section {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 30px 34px 24px 34px;
+      margin: 34px 0;
+      max-width: 1200px;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+    .card-title {
+      color: var(--white);
+      background: linear-gradient(90deg, var(--accent-blue-strong), var(--accent-blue));
+      padding: 7px 22px 5px 22px;
+      border-radius: 13px;
+      display: inline-block;
+      font-size: 1.46rem;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 10px #4aabff22;
+      letter-spacing: 1px;
+    }
+    .desc {
+      color: #252c38;
+      font-size: 1.09rem;
+      margin-bottom: 25px;
+      margin-top: 5px;
+    }
+    .creator-card {
+      background: var(--white);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 22px 24px 18px 24px;
+      margin: 0 0 22px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: stretch;
+      position: relative;
+      z-index: 2;
+    }
+    .creator-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 13px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .creator-row label {
+      min-width: 110px;
+      color: var(--accent-blue-strong);
+      font-size: 1.07rem;
+      font-weight: 600;
+    }
+    .creator-row select, .creator-row input[type="text"], .creator-row input[type="number"], .creator-row textarea {
+      padding: 7px 12px;
+      border-radius: 10px;
+      border: 1.4px solid var(--accent-blue);
+      font-size: 1.07rem;
+      margin-right: 6px;
+      background: var(--white);
+      color: var(--text);
+      font-weight: 500;
+    }
+    .creator-row input[type="number"] {
+      width: 110px;
+    }
+    .creator-row textarea {
+      width: 320px;
+      height: 48px;
+      font-family: 'Fira Mono', monospace;
+    }
+    .creator-row button {
+      background: var(--white);
+      color: var(--accent-blue-strong);
+      border: 1.7px solid var(--accent-blue);
+      border-radius: 12px;
+      padding: 8px 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: background 0.18s, color 0.18s;
+      margin-left: 10px;
+      letter-spacing: 0.5px;
+    }
+    .creator-row button:hover {
+      background: var(--button-hover);
+      color: var(--accent-blue-strong);
+      border-color: var(--accent-blue-strong);
+    }
+    .creator-plugins {
+      margin: 8px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    .plugin-btn {
+      background: var(--white);
+      color: var(--accent-blue-strong);
+      border: 1.3px solid var(--accent-blue-strong);
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.98rem;
+      padding: 7px 15px;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+    }
+    .plugin-btn.selected, .plugin-btn:active {
+      background: var(--accent-blue);
+      color: var(--white);
+      border: 1.5px solid var(--accent-blue-strong);
+    }
+    .creator-table-wrap {
+      overflow-x: auto;
+      margin-top: 12px;
+    }
+    .creator-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: monospace;
+      font-size: 1.00rem;
+      margin-bottom: 10px;
+      background: #f8fbff;
+      border-radius: 7px;
+      overflow: hidden;
+      box-shadow: 0 1px 10px #e3e3fa22;
+    }
+    .creator-table th, .creator-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #e2e7ff55;
+      text-align: left;
+      background: var(--white);
+      vertical-align: top;
+      color: var(--text);
+      font-weight: 500;
+    }
+    .creator-table th {
+      background: var(--white);
+      color: var(--accent-blue-strong);
+      font-weight: 700;
+      border-bottom: 2px solid #4aabff33;
+      font-size: 1.06em;
+    }
+    .creator-table tr:last-child td {
+      border-bottom: none;
+    }
+    .creator-address {
+      font-family: monospace;
+      background: #eaf6ff55;
+      border-radius: 8px;
+      padding: 4px 9px;
+      color: var(--accent-blue-strong);
+      word-break: break-all;
+      font-size: 1.04rem;
+      border: 1px solid #cbe8ff;
+    }
+    .creator-abi, .creator-bytecode, .creator-result {
+      font-family: monospace;
+      background: #f4f8fe;
+      border-radius: 8px;
+      padding: 4px 9px;
+      color: var(--accent-blue-strong);
+      font-size: 0.99rem;
+      margin-bottom: 4px;
+      max-width: 360px;
+      word-break: break-all;
+      overflow-x: auto;
+      border: 1px solid #e2e7ff77;
+    }
+    .creator-cols {
+      display: flex;
+      flex-direction: row;
+      gap: 18px;
+      align-items: stretch;
+      justify-content: flex-start;
+      margin-top: 7px;
+    }
+    .creator-cols .creator-col {
+      flex: 1 1 0;
+      min-width: 210px;
+      max-width: 370px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .creator-actions button {
+      margin-right: 8px;
+      margin-top: 3px;
+      margin-bottom: 3px;
+      background: var(--white);
+      color: var(--accent-blue-strong);
+      border: 1.6px solid var(--accent-blue);
+      border-radius: 9px;
+      padding: 7px 13px;
+      cursor: pointer;
+      font-size: 0.97rem;
+      transition: background 0.15s, color 0.15s;
+    }
+    .creator-actions button:hover {
+      background: var(--button-hover);
+      color: var(--accent-blue-strong);
+      border-color: var(--accent-blue-strong);
+    }
+    .creator-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .creator-label {
+      color: var(--accent-blue-strong);
+      font-size: 0.97em;
+      font-weight: 600;
+    }
+    footer {
+      text-align: center;
+      margin: 34px 0 14px 0;
+      color: #214069;
+      z-index: 2;
+      position: relative;
+      font-size: 1.01rem;
+      font-weight: 600;
+    }
+    @media (max-width: 1200px) {
+      .creator-cols { flex-direction: column; gap: 10px;}
+      .creator-col {max-width: 99vw;}
+    }
+    @media (max-width: 1000px) {
+      .card-section { max-width: 98vw; }
+      .creator-table { font-size: 0.93rem; }
+    }
+    @media (max-width: 650px) {
+      .card-section {
+        padding: 15px 2vw;
+        max-width: 99vw;
+      }
+      .creator-card { padding: 10px 2vw 10px 2vw;}
+      .creator-table th, .creator-table td { padding: 6px 4px;}
+      .creator-row textarea {width: 96vw;}
+      .creator-cols {flex-direction: column;}
+      .creator-col {max-width: 98vw;}
+    }
+  </style>
+  <!-- Web3.js (for wallet integration) -->
+  <script src="https://cdn.jsdelivr.net/npm/web3@4.6.0/dist/web3.min.js"></script>
+  <!-- solc-js for Solidity compilation in-browser -->
+  <script src="https://unpkg.com/solc@0.8.25/soljson.js"></script>
+  <script>
+    import { Web3Auth, WEB3AUTH_NETWORK, WALLET_CONNECTORS, MFA_LEVELS } from '@web3auth/modal'
+
+const web3auth = new Web3Auth({
+  clientId: 'BJxn5I3bhU-uhDoK2AQH0jwkjV3hUreulZsIkYYiLCd0yXJhaqlPZhdeNsA8ryoBRUkhUv0QtevwA9JidLtx0Ec',
+  web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
+  modalConfig: {
+    connectors: {
+      [WALLET_CONNECTORS.AUTH]: {
+        label: 'auth',
+        loginMethods: {
+          google: {
+            name: 'google login',
+            // logoDark: "url to your custom logo which will shown in dark mode",
+          },
+          facebook: {
+            name: 'facebook login',
+            showOnModal: true, // hides the facebook option
+          },
+          email_passwordless: {
+            name: 'email passwordless login',
+            showOnModal: true,
+            authConnectionId: 'w3a-email_passwordless-demo',
+          },
+          sms_passwordless: {
+            name: 'sms passwordless login',
+            showOnModal: true,
+            authConnectionId: 'w3a-sms_passwordless-demo',
+          },
+        },
+        showOnModal: true, // set to false to hide all social login methods
+      },
+    },
+    hideWalletDiscovery: true, // set to true to hide external wallets discovery
+  },
+  mfaLevel: MFA_LEVELS.MANDATORY,
+})
+
+    await web3auth.connect()
+// Use with a Solana library
+const solanaWallet = new SolanaWallet(web3auth.provider)
+
+    await web3auth.connect()
+// Use with ethers.js
+const ethProvider = new ethers.BrowserProvider(web3auth.provider)
+// OR
+// Use with viem
+const walletClient = createWalletClient({
+  chain: getViewChain(web3auth.provider),
+  transport: custom(web3auth.provider),
+})
+
+
+await web3auth.init()
+    
+  </script>
+
+</head>
+<body>
+  <!-- Blue Circles -->
+  <div class="bg-circles" id="bg-circles"></div>
+  <!-- Pink Blurred Circles -->
+  <div class="bg-circles" id="bg-circles-pink"></div>
+  <!-- Navigation -->
+  <header>
+    <div class="nav-logo">EVMt EVM Creator</div>
+    <nav>
+      <ul>
+        <li><a href="#creator">EVM Creator</a></li>
+        <li><a href="#contracts">Contracts</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+    </nav>
+    <div id="wallet-status" class="wallet-status disconnected">Not Connected</div>
+  </header>
+  <main>
+    <section id="about" class="card-section">
+      <h2 class="card-title">Smart Contract Creator Set</h2>
+      <div class="desc">
+        A professional EVM contract creation suite with:<br>
+        <ul>
+          <li><b>Auto Pragma Solidity:</b> Easily select the Solidity version for your contract.</li>
+          <li><b>Unlimited Contract Creation:</b> Deploy as many contracts as you need, with multi-supply options per contract.</li>
+          <li><b>Plugins & Scripts:</b> Choose from templates, plugins, and code injections for your contracts.</li>
+          <li><b>Production Deployment & Results:</b> Deploy contracts, see contract address, ABI, bytecode, and gas estimation for each contract creation, all in separate columns for easy copy/download and integration.</li>
+          <li><b>Wallet Connection:</b> Connect your Web3 wallet (MetaMask, etc.) before deploying for real blockchain interaction.</li>
+          <li><b>Blue Aero UI:</b> Modern glass, blue/pink animated background, beautiful cards and tables.</li>
+        </ul>
+      </div>
+    </section>
+    <!-- Contract Creator Card -->
+    <section id="creator" class="card-section">
+      <h2 class="card-title">EVM Smart Contract Creator</h2>
+      <div class="desc">Configure contract version, supply, scripts/plugins, and deploy! Real Solidity source code is compiled and deployed in-browser to your connected wallet.<br><b>Connect your wallet to deploy on chain.</b></div>
+      <div class="creator-card">
+        <div class="creator-row">
+          <label for="sol-version">Pragma Solidity:</label>
+          <select id="sol-version">
+            <option value="0.8.25">0.8.25 (latest)</option>
+          </select>
+        </div>
+        <div class="creator-row">
+          <label for="contract-name">Contract Name:</label>
+          <input type="text" id="contract-name" placeholder="TokenName" value="DemoToken" />
+        </div>
+        <div class="creator-row">
+          <label for="supply">Supply:</label>
+          <input type="number" id="supply" min="1" max="999999999999" value="1000000" />
+          <select id="supply-type">
+            <option value="unlimited">Unlimited</option>
+            <option value="fixed">Fixed</option>
+            <option value="capped">Capped</option>
+          </select>
+        </div>
+        <div class="creator-row">
+          <label>Plugins/Scripts:</label>
+          <div class="creator-plugins" id="plugins-row">
+            <button class="plugin-btn" data-plugin="mintable">Mintable</button>
+            <button class="plugin-btn" data-plugin="burnable">Burnable</button>
+            <button class="plugin-btn" data-plugin="pausable">Pausable</button>
+            <button class="plugin-btn" data-plugin="ownership">Ownable</button>
+            <button class="plugin-btn" data-plugin="erc20">ERC20</button>
+            <button class="plugin-btn" data-plugin="erc721">ERC721</button>
+            <button class="plugin-btn" data-plugin="timelock">Timelock</button>
+          </div>
+        </div>
+        <div class="creator-row">
+          <label for="custom-script">Custom Script:</label>
+          <textarea id="custom-script" placeholder="// Custom contract body"></textarea>
+        </div>
+        <div class="creator-row">
+          <button id="deploy-btn">Deploy Contract</button>
+          <button id="connect-wallet-btn" style="margin-left:15px;">Connect Wallet</button>
+        </div>
+      </div>
+    </section>
+    <!-- Contract Result Table -->
+    <section id="contracts" class="card-section">
+      <h2 class="card-title">Deployed Contracts</h2>
+      <div class="desc">All deployed contracts appear here, with unlimited unique contract addresses and supply options. Each row separates ABI, Bytecode, Gas (est.), and Result into their own columns for easy copy/download and integration.</div>
+      <div class="creator-table-wrap">
+        <table class="creator-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Address</th>
+              <th>Supply</th>
+              <th>Type</th>
+              <th>ABI</th>
+              <th>Bytecode</th>
+              <th>Gas (est.)</th>
+              <th>Result</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="contracts-tbody">
+            <tr><td colspan="10" style="text-align:center;color:#b7b7b7;">No contracts yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <footer>
+    &copy; 2025 EVMt UIx-wg. Blue Aero UI Demo. All rights reserved.
+  </footer>
+  <!-- Animated Circles & Contract JS -->
+  <script>
+    // Blue Circles
+    const circlesBlue = [
+      {size: 230, top: 22, left: 8, dur: 18},
+      {size: 180, top: 70, left: 80, dur: 14},
+      {size: 270, top: 190, left: 320, dur: 17},
+      {size: 220, top: 390, left: 180, dur: 15},
+      {size: 200, top: 220, left: 600, dur: 21},
+      {size: 170, top: 410, left: 720, dur: 16},
+      {size: 220, top: 130, left: 880, dur: 17},
+      {size: 170, top: 330, left: 1020, dur: 19}
+    ];
+    const circlesPink = [
+      {size: 340, top: 180, left: 300, dur: 25},
+      {size: 220, top: 320, left: 900, dur: 22},
+      {size: 170, top: 330, left: 1200, dur: 24}
+    ];
+    function createCircleBlue({size, top, left, dur}, i) {
+      const c = document.createElement('div');
+      c.className = 'circle blue';
+      c.style.width = `${size}px`;
+      c.style.height = `${size}px`;
+      c.style.top = `${top}px`;
+      c.style.left = `${left}px`;
+      c.style.animationDuration = `${dur}s`;
+      document.getElementById('bg-circles').appendChild(c);
+    }
+    function createCirclePink({size, top, left, dur}, i) {
+      const c = document.createElement('div');
+      c.className = 'circle pink';
+      c.style.width = `${size}px`;
+      c.style.height = `${size}px`;
+      c.style.top = `${top}px`;
+      c.style.left = `${left}px`;
+      c.style.animationDuration = `${dur}s`;
+      document.getElementById('bg-circles-pink').appendChild(c);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      for (let i=0;i<circlesBlue.length;i++) createCircleBlue(circlesBlue[i], i);
+      for (let i=0;i<circlesPink.length;i++) createCirclePink(circlesPink[i], i);
+    });
+
+    // --- Contract Creator Logic ---
+    let selectedPlugins = new Set();
+    document.querySelectorAll('.plugin-btn').forEach(btn => {
+      btn.onclick = function() {
+        if (selectedPlugins.has(this.dataset.plugin)) {
+          selectedPlugins.delete(this.dataset.plugin);
+          this.classList.remove('selected');
+        } else {
+          selectedPlugins.add(this.dataset.plugin);
+          this.classList.add('selected');
+        }
+      }
+    });
+
+    // Web3 provider integration
+    let web3;
+    let userAccount = '';
+    let isWalletConnected = false;
+    const walletStatusDiv = document.getElementById('wallet-status');
+    function setWalletStatus(connected, addr) {
+      if(connected) {
+        walletStatusDiv.classList.remove('disconnected');
+        walletStatusDiv.classList.add('connected');
+        walletStatusDiv.innerHTML = `<span style="font-size:1.18em;">🟢</span> ${addr.slice(0,6)}...${addr.slice(-4)}`;
+      } else {
+        walletStatusDiv.classList.add('disconnected');
+        walletStatusDiv.classList.remove('connected');
+        walletStatusDiv.innerHTML = 'Not Connected';
+      }
+    }
+    async function connectWallet() {
+      if(window.ethereum || window.web3) {
+        try {
+          if(window.ethereum) {
+            web3 = new Web3(window.ethereum);
+            await window.ethereum.request({ method: 'eth_requestAccounts' });
+          } else {
+            web3 = new Web3(window.web3.currentProvider);
+          }
+          const accounts = await web3.eth.getAccounts();
+          userAccount = accounts[0];
+          isWalletConnected = true;
+          setWalletStatus(true, userAccount);
+        } catch (err) {
+          alert("Wallet connection failed!");
+        }
+      } else {
+        alert('No Web3 wallet found. Please install MetaMask or similar.');
+      }
+    }
+    document.getElementById('connect-wallet-btn').onclick = connectWallet;
+
+    // Solidity Contract Templates (simplified for demo)
+    function getSoliditySource(name, supply, supplyType, plugins, customScript, version) {
+      let pragma = `pragma solidity ${version};\n`;
+      let content = '';
+      // Simple ERC20 constructor
+      content += `contract ${name} {\n`;
+      content += `  string public name = "${name}";\n`;
+      content += `  uint256 public totalSupply = ${supply};\n`;
+      content += `  address public owner;\n`;
+      content += `  constructor() { owner = msg.sender; }\n`;
+      if (plugins.includes("mintable")) content += `  function mint(uint256 amount) public { totalSupply += amount; }\n`;
+      if (plugins.includes("burnable")) content += `  function burn(uint256 amount) public { require(totalSupply >= amount); totalSupply -= amount; }\n`;
+      if (plugins.includes("pausable")) content += `  bool public paused; function pause() public { paused = true; } function unpause() public { paused = false; }\n`;
+      if (plugins.includes("ownership")) content += `  function transferOwnership(address newOwner) public { owner = newOwner; }\n`;
+      if (plugins.includes("erc20")) content += `  function transfer(address to, uint256 amount) public {}\n`;
+      if (plugins.includes("erc721")) content += `  function mintNFT(address to, uint256 tokenId) public {}\n`;
+      if (plugins.includes("timelock")) content += `  uint256 public unlockTime; function setUnlock(uint256 t) public { unlockTime = t; }\n`;
+      if (customScript) content += `  ${customScript}\n`;
+      content += `}`;
+      return pragma + content;
+    }
+
+    // Compile Solidity using solc-js
+    async function compileSolidity(source, contractName = "DemoToken") {
+      // solc is loaded globally via script
+      var input = {
+        language: 'Solidity',
+        sources: {
+          'Contract.sol': { content: source }
+        },
+        settings: {
+          outputSelection: { '*': { '*': [ 'abi', 'evm.bytecode.object' ] } }
+        }
+      };
+      const output = JSON.parse(solc.compile(JSON.stringify(input)));
+      if (output.errors) {
+        let errorMsg = output.errors.map(e => e.formattedMessage).join('\n');
+        throw new Error(errorMsg);
+      }
+      let contractOut = output.contracts['Contract.sol'][contractName];
+      if (!contractOut) throw new Error('Contract not found in compilation output');
+      return {
+        abi: contractOut.abi,
+        bytecode: contractOut.evm.bytecode.object
+      };
+    }
+
+    // Deployed contracts in-memory
+    let contracts = [];
+
+    // Deploy contract using web3
+    document.getElementById('deploy-btn').onclick = async function() {
+      let version = document.getElementById('sol-version').value;
+      let name = document.getElementById('contract-name').value.trim() || "MyToken";
+      let supply = document.getElementById('supply').value;
+      let supplyType = document.getElementById('supply-type').value;
+      let script = document.getElementById('custom-script').value.trim();
+      let plugins = Array.from(selectedPlugins);
+      if (!plugins.length) plugins = ['erc20'];
+      let resultMsg = '';
+      let abi = '';
+      let bytecode = '';
+      let contractAddress = '';
+      let gasUsed = 0;
+      // Compile Solidity, estimate gas, deploy if connected
+      try {
+        const source = getSoliditySource(name, supply, supplyType, plugins, script, version);
+        const compiled = await compileSolidity(source, name);
+        abi = JSON.stringify(compiled.abi, null, 2);
+        bytecode = "0x" + compiled.bytecode;
+        // If wallet connected, deploy for real
+        if (isWalletConnected && web3 && bytecode !== "0x") {
+          const contract = new web3.eth.Contract(compiled.abi);
+          // Estimate gas
+          let deployParams = { data: bytecode };
+          let estGas = await contract.deploy(deployParams).estimateGas({ from: userAccount });
+          // Deploy
+          contract.deploy(deployParams)
+            .send({ from: userAccount, gas: estGas })
+            .on('transactionHash', function(hash){
+              resultMsg = 'Tx Sent: '+hash;
+              addDeployedContract(name, '', supply, supplyType, abi, bytecode, estGas, resultMsg);
+            })
+            .on('receipt', function(receipt){
+              contractAddress = receipt.contractAddress;
+              resultMsg = 'Deployed: ' + contractAddress + ' (Tx: ' + receipt.transactionHash + ')';
+              updateLastResult(contractAddress, resultMsg);
+            })
+            .on('error', function(error){
+              resultMsg = 'Error: ' + error.message;
+              updateLastResult('', resultMsg);
+            });
+          return; // Don't add row now, will be handled in callback!
+        } else {
+          gasUsed = 0;
+          contractAddress = '(demo)';
+          resultMsg = 'Demo: Compiled, not deployed. Connect wallet to deploy!';
+        }
+      } catch (e) {
+        resultMsg = 'Error: ' + e.message;
+      }
+      addDeployedContract(name, contractAddress, supply, supplyType, abi, bytecode, gasUsed, resultMsg);
+    };
+
+    function addDeployedContract(name, address, supply, supplyType, abi, bytecode, gas, result) {
+      let contract = {
+        idx: contracts.length+1,
+        name,
+        address,
+        supply,
+        type: supplyType,
+        abi,
+        bytecode,
+        gas,
+        result
+      };
+      contracts.unshift(contract);
+      if (contracts.length > 25) contracts.length = 25;
+      renderContracts();
+    }
+    function updateLastResult(address, result) {
+      if (contracts.length) {
+        if (address) contracts[0].address = address;
+        contracts[0].result = result;
+        renderContracts();
+      }
+    }
+
+    // Render contracts table, ABI, Bytecode, Gas, Result in separate columns
+    function renderContracts() {
+      let tbody = document.getElementById('contracts-tbody');
+      if (!contracts.length) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#b7b7b7;">No contracts yet</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = '';
+      contracts.forEach(contract => {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${contract.idx}</td>
+          <td>${contract.name}</td>
+          <td><div class="creator-address">${contract.address || ''}</div></td>
+          <td>${contract.supply}</td>
+          <td>${contract.type}</td>
+          <td>
+            <div class="creator-cols">
+              <div class="creator-col">
+                <div class="creator-label">ABI</div>
+                <div class="creator-abi" id="abi-${contract.idx}">${contract.abi.slice(0,140)}${contract.abi.length>140?'...':''}</div>
+                <div>
+                  <button onclick="copyToClipboard('${contract.abi.replace(/'/g,"\\'").replace(/\n/g," ")}','ABI')">Copy</button>
+                  <button onclick="downloadText('${contract.name}_abi.json', \`${contract.abi}\`)">Download</button>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="creator-cols">
+              <div class="creator-col">
+                <div class="creator-label">Bytecode</div>
+                <div class="creator-bytecode" id="bytecode-${contract.idx}">${contract.bytecode.slice(0,44)}...</div>
+                <div>
+                  <button onclick="copyToClipboard('${contract.bytecode}','Bytecode')">Copy</button>
+                  <button onclick="downloadText('${contract.name}_bytecode.txt', \`${contract.bytecode}\`)">Download</button>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="creator-cols">
+              <div class="creator-col">
+                <div class="creator-label">Gas Est.</div>
+                <div class="creator-result">${contract.gas}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="creator-cols">
+              <div class="creator-col">
+                <div class="creator-label">Result</div>
+                <div class="creator-result">${contract.result || "Pending"}</div>
+              </div>
+            </div>
+          </td>
+          <td class="creator-actions">
+            <button onclick="alert('Verify contract: '+this.parentNode.parentNode.children[2].textContent.trim())">Verify</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    // Copy to clipboard helper
+    function copyToClipboard(text, label) {
+      navigator.clipboard.writeText(text).then(()=>{
+        alert(label+" copied!");
+      });
+    }
+    window.copyToClipboard = copyToClipboard;
+    // Download helper
+    function downloadText(filename, text) {
+      let blob = new Blob([text], {type: 'text/plain'});
+      let url = URL.createObjectURL(blob);
+      let a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>{document.body.removeChild(a); URL.revokeObjectURL(url);}, 200);
+    }
+    window.downloadText = downloadText;
+
+    // Plugins visual feedback (highlight on selection)
+    document.getElementById('plugins-row').addEventListener('click', function(e){
+      if(e.target.classList.contains('plugin-btn')) {
+        e.target.classList.toggle('selected');
+      }
+    });
+  </script>
+</body>
+</html>
